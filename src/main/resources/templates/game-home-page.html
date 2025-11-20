@@ -1,0 +1,419 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Guess The Country</title>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700&family=Roboto:wght@300;400&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary-color: #3498db;
+            --secondary-color: #2ecc71;
+            --danger-color: #e74c3c;
+            --dark-color: #2c3e50;
+            --light-color: #ecf0f1;
+            --success-color: #27ae60;
+            --warning-color: #f39c12;
+        }
+
+        body {
+            font-family: 'Roboto', sans-serif;
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            margin: 0;
+            padding: 0;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: var(--dark-color);
+        }
+
+        .game-container {
+            background-color: white;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            width: 90%;
+            max-width: 600px;
+            padding: 30px;
+            text-align: center;
+            position: relative;
+        }
+
+        h1 {
+            font-family: 'Montserrat', sans-serif;
+            color: var(--dark-color);
+            margin: 0 0 20px 0;
+            font-size: 2.5rem;
+            background: linear-gradient(to right, var(--primary-color), var(--secondary-color));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .country-display {
+            font-size: 2.2rem;
+            letter-spacing: 0.8rem;
+            margin: 30px 0;
+            font-weight: 600;
+            color: var(--primary-color);
+            min-height: 60px;
+            text-transform: uppercase;
+        }
+
+        .tries-container {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background-color: var(--danger-color);
+            color: white;
+            padding: 8px 15px;
+            border-radius: 20px;
+            font-weight: 600;
+            font-size: 0.9rem;
+            box-shadow: 0 4px 10px rgba(231, 76, 60, 0.3);
+        }
+
+        /* MASTERCLASS HINT STYLING */
+        .hint-container {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 15px 25px;
+            border-radius: 12px;
+            margin: 20px 0;
+            font-size: 1rem;
+            font-weight: 500;
+            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+            position: relative;
+            overflow: hidden;
+            animation: hintGlow 2s ease-in-out infinite;
+        }
+
+        .hint-container::before {
+            content: "💡";
+            font-size: 1.5rem;
+            margin-right: 10px;
+            animation: bulbFlicker 1.5s ease-in-out infinite;
+        }
+
+        .hint-container span {
+            font-weight: 600;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+        }
+
+        @keyframes hintGlow {
+            0%, 100% {
+                box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+            }
+            50% {
+                box-shadow: 0 8px 25px rgba(102, 126, 234, 0.6);
+            }
+        }
+
+        @keyframes bulbFlicker {
+            0%, 100% {
+                opacity: 1;
+            }
+            50% {
+                opacity: 0.7;
+            }
+        }
+
+        /* MASTERCLASS GAME STATUS MESSAGES */
+        .game-over-message {
+            margin-top: 25px;
+            padding: 20px;
+            border-radius: 12px;
+            font-size: 1.3rem;
+            font-weight: 700;
+            min-height: 50px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            transition: all 0.4s ease;
+            opacity: 0;
+            transform: scale(0.9);
+        }
+
+        .game-over-message.show {
+            opacity: 1;
+            transform: scale(1);
+            animation: messageAppear 0.5s ease-out;
+        }
+
+        /* Victory Message */
+        .game-over-message.victory {
+            background: linear-gradient(135deg, #2ecc71, #27ae60);
+            color: white;
+            box-shadow: 0 8px 25px rgba(46, 204, 113, 0.4);
+            animation: victoryPulse 1s ease-in-out infinite;
+        }
+
+        .game-over-message.victory::before {
+            content: "🎉";
+            font-size: 2rem;
+            animation: celebrate 0.6s ease-in-out infinite;
+        }
+
+        .game-over-message.victory::after {
+            content: "🎊";
+            font-size: 2rem;
+            animation: celebrate 0.6s ease-in-out infinite 0.3s;
+        }
+
+        /* Defeat Message */
+        .game-over-message.defeat {
+            background: linear-gradient(135deg, #e74c3c, #c0392b);
+            color: white;
+            box-shadow: 0 8px 25px rgba(231, 76, 60, 0.4);
+        }
+
+        .game-over-message.defeat::before {
+            content: "😔";
+            font-size: 2rem;
+        }
+
+        /* Excellent/Success Message */
+        .game-over-message.excellent {
+            background: linear-gradient(135deg, #f39c12, #e67e22);
+            color: white;
+            box-shadow: 0 8px 25px rgba(243, 156, 18, 0.4);
+            animation: excellentShine 1.5s ease-in-out infinite;
+        }
+
+        .game-over-message.excellent::before {
+            content: "⭐";
+            font-size: 2rem;
+            animation: starTwinkle 1s ease-in-out infinite;
+        }
+
+        .game-over-message.excellent::after {
+            content: "⭐";
+            font-size: 2rem;
+            animation: starTwinkle 1s ease-in-out infinite 0.5s;
+        }
+
+        @keyframes messageAppear {
+            0% {
+                opacity: 0;
+                transform: translateY(-20px) scale(0.8);
+            }
+            100% {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
+        }
+
+        @keyframes victoryPulse {
+            0%, 100% {
+                transform: scale(1);
+            }
+            50% {
+                transform: scale(1.05);
+            }
+        }
+
+        @keyframes celebrate {
+            0%, 100% {
+                transform: rotate(0deg) scale(1);
+            }
+            25% {
+                transform: rotate(-15deg) scale(1.1);
+            }
+            75% {
+                transform: rotate(15deg) scale(1.1);
+            }
+        }
+
+        @keyframes excellentShine {
+            0%, 100% {
+                box-shadow: 0 8px 25px rgba(243, 156, 18, 0.4);
+            }
+            50% {
+                box-shadow: 0 10px 30px rgba(243, 156, 18, 0.7);
+            }
+        }
+
+        @keyframes starTwinkle {
+            0%, 100% {
+                opacity: 1;
+                transform: scale(1);
+            }
+            50% {
+                opacity: 0.6;
+                transform: scale(1.2);
+            }
+        }
+
+        .game-form {
+            margin: 30px 0;
+        }
+
+        .form-group {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        label {
+            font-weight: 600;
+            margin-right: 10px;
+        }
+
+        input[type="text"] {
+            width: 50px;
+            height: 50px;
+            text-align: center;
+            font-size: 1.5rem;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            transition: all 0.3s;
+        }
+
+        input[type="text"]:focus {
+            border-color: var(--primary-color);
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.2);
+        }
+
+        .btn {
+            padding: 12px 25px;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .btn-primary {
+            background-color: var(--secondary-color);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background-color: #27ae60;
+            transform: translateY(-2px);
+        }
+
+        .btn-secondary {
+            background-color: var(--light-color);
+            color: var(--dark-color);
+        }
+
+        .btn-secondary:hover {
+            background-color: #bdc3c7;
+            transform: translateY(-2px);
+        }
+
+        .btn:disabled {
+            background-color: #95a5a6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .globe-icon {
+            font-size: 2rem;
+            margin-bottom: 10px;
+            color: var(--primary-color);
+        }
+
+        @media (max-width: 500px) {
+            .country-display {
+                font-size: 1.8rem;
+                letter-spacing: 0.5rem;
+            }
+
+            h1 {
+                font-size: 2rem;
+            }
+
+            .hint-container {
+                font-size: 0.9rem;
+                padding: 12px 20px;
+            }
+
+            .game-over-message {
+                font-size: 1.1rem;
+                padding: 15px;
+            }
+        }
+    </style>
+    <script th:inline="javascript">
+        window.onload = function() {
+            var triesRemaining = /*[[${triesLeft}]]*/ 5;
+            var gameOver = /*[[${gameOver}]]*/ false;
+            var message = /*[[${message}]]*/ "";
+
+            // If game is won or lost
+            if (gameOver) {
+                var statusElement = document.getElementById('game-status');
+                statusElement.textContent = message;
+
+                // Add appropriate class based on message content
+                if (message.toLowerCase().includes('won') || message.toLowerCase().includes('congratulations')) {
+                    statusElement.classList.add('victory');
+                } else if (message.toLowerCase().includes('excellent') || message.toLowerCase().includes('great')) {
+                    statusElement.classList.add('excellent');
+                } else if (message.toLowerCase().includes('lost') || message.toLowerCase().includes('game over')) {
+                    statusElement.classList.add('defeat');
+                }
+
+                // Show the message with animation
+                setTimeout(() => {
+                    statusElement.classList.add('show');
+                }, 100);
+
+                // Disable inputs when game ends
+                document.getElementById('try').disabled = true;
+                document.getElementById('gusedCharacter').disabled = true;
+            }
+
+            // Focus input
+            document.getElementById('gusedCharacter').focus();
+        };
+
+        function reloadGame() {
+            window.location.href = "/reload";
+        }
+    </script>
+</head>
+
+<body>
+<div class="game-container">
+
+    <div class="tries-container" th:text="'Tries: ' + ${triesLeft}"></div>
+
+    <div class="globe-icon">🌎</div>
+    <h1>Guess The Country</h1>
+
+    <!-- Enhanced Hint Section -->
+    <div class="hint-container">
+        Hint: <span th:text="${hint}">Hint will appear here</span>
+    </div>
+
+    <!-- Word display -->
+    <div class="country-display" th:text="${wordToDisplay}"></div>
+
+    <!-- Guess form -->
+    <div class="game-form">
+        <form action="game-home" method="GET">
+            <div class="form-group">
+                <label for="gusedCharacter">Enter a letter:</label>
+                <input type="text" name="guessedCharacter" id="gusedCharacter"
+                       maxlength="1" autocomplete="off" />
+                <input type="submit" value="Guess" id="try" class="btn btn-primary" />
+            </div>
+        </form>
+    </div>
+
+    <!-- Restart button -->
+    <button onclick="reloadGame();" class="btn btn-secondary">New Country</button>
+
+    <!-- Enhanced Message area -->
+    <div id="game-status" class="game-over-message" th:text="${message}"></div>
+
+</div>
+</body>
+</html>
