@@ -15,9 +15,12 @@ public class GameService {
 
     private char[] allChacterOfTheWorld;
 
+<<<<<<< HEAD
     private int chosenIndex; // store the index of the randomly chosen word
 
 
+=======
+>>>>>>> 19a921ec40ea79fccb669c752c11d1a3cec6d427
     private String[] randomWords = {
             "unitedstates", "canada", "brazil", "mexico", "argentina",
             "france", "germany", "italy", "spain", "unitedkingdom",
@@ -26,6 +29,7 @@ public class GameService {
             "turkey", "saudiarabia", "indonesia", "thailand", "vietnam",
             "sweden", "norway", "finland", "denmark", "netherlands",
             "switzerland", "austria", "belgium", "poland", "greece",
+<<<<<<< HEAD
             "portugal", "morocco", "algeria", "tunisia", "greece",
             "iran", "iraq", "pakistan", "bangladesh", "philippines",
             "malaysia", "singapore", "chile", "colombia", "peru"
@@ -100,6 +104,21 @@ public class GameService {
         return hints[chosenIndex];
     }
 
+=======
+            "portugal", "morocco", "algeria", "tunisia", "israel",
+            "iran", "iraq", "pakistan", "bangladesh", "philippines",
+            "malaysia", "singapore", "chile", "colombia", "peru"
+    };
+
+   Random random = new Random();
+
+
+    public GameService() {
+        randomlychoosenWord = randomWords[random.nextInt(randomWords.length)];
+        System.out.println("the world chosen is  "+ randomlychoosenWord);
+        allChacterOfTheWorld = new char[randomlychoosenWord.length()];
+     }
+>>>>>>> 19a921ec40ea79fccb669c752c11d1a3cec6d427
 
     @Override
     public String toString() {
@@ -130,6 +149,7 @@ public class GameService {
             return isGuessCorrect;
         }
 
+<<<<<<< HEAD
     public boolean isWordGuessed() {
         for (char c : allChacterOfTheWorld) {
             if (c == '\u0000') {
@@ -145,3 +165,6 @@ public class GameService {
 
 
 }
+=======
+    }
+>>>>>>> 19a921ec40ea79fccb669c752c11d1a3cec6d427
